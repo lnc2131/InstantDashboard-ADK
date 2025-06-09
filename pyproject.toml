@@ -1,0 +1,71 @@
+[tool.poetry]
+name = "instant-dashboard"
+version = "0.1.0"
+description = "InstantDashboard - Multi-agent data analytics assistant with natural language interface"
+authors = ["InstantDashboard Team"]
+license = "Apache License 2.0"
+readme = "README.md"
+package-mode = true
+
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+# Core ADK dependencies
+google-adk = "^1.0.0"
+google-cloud-aiplatform = { extras = [
+    "adk",
+    "agent-engines",
+], version = "^1.93.0" }
+
+# Database and BigQuery dependencies
+google-cloud-bigquery = "^3.28.0"
+google-cloud-bigquery-storage = "^2.26.0"
+db-dtypes = "^1.4.2"
+sqlglot = "^26.10.1"
+
+# Data processing dependencies
+pandas = "^2.2.0"
+numpy = "^1.26.0"
+
+# Configuration and utilities
+python-dotenv = "^1.0.1"
+pydantic = "^2.11.3"
+jsonschema = "^4.23.0"
+requests = "^2.32.0"
+tabulate = "^0.9.0"
+
+# AI/ML dependencies
+immutabledict = "^4.2.1"
+absl-py = "^2.2.2"
+regex = "^2024.11.6"
+
+
+[tool.poetry.group.dev.dependencies]
+google-cloud-aiplatform = { extras = [
+    "adk",
+    "agent-engines",
+    "evaluation",
+], version = "^1.93.0" }
+pytest = "^8.3.5"
+pytest-asyncio = "^0.26.0"
+
+
+[tool.pytest.ini_options]
+console_output_style = "progress"
+addopts = "-vv -s"
+#addopts = "-vv -s --pdb"
+testpaths = ["tests/", "instant_dashboard/"]
+log_level = "DEBUG"
+log_cli = true
+log_auto_indent = true
+log_cli_date_format = "%Y-%m-%d %H:%M:%S"
+log_cli_format = "[%(asctime)s] %(levelname)s (%(funcName)s) \t [%(pathname)s:%(lineno)d] %(message)s"
+filterwarnings = [
+    "ignore::UserWarning",
+]
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

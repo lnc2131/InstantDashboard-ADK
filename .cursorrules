@@ -1,0 +1,220 @@
+# Cursor Rules for InstantDashboard Multi-Agent System
+
+## Project Overview
+This is a multi-agent data analytics system built on Google's Agent Development Kit (ADK). The project contains:
+- `data_science/` - Original Google ADK sample agent (DO NOT MODIFY)
+- `instant_dashboard/` - Our custom InstantDashboard agent (ACTIVE DEVELOPMENT)
+
+## Current Development Status
+- **Phase 1**: Foundation Setup (COMPLETED ✅)
+- **Phase 2**: QueryPlannerAgent (COMPLETED ✅)
+- **Phase 3**: BigQueryRunner (CURRENT - IN PROGRESS)
+- **Future**: ChartGenerator, InsightGenerator
+
+## Learning-Focused Development Approach
+- **Go SLOW**: Focus on understanding one feature at a time
+- **Explain Each Step**: Clearly explain what each piece of code does and why
+- **Build Incrementally**: Complete one small piece before moving to the next
+- **User Understanding First**: Prioritize the user's learning over speed of completion
+- **Ask Before Proceeding**: Check if the user understands before moving to next step
+
+## Architecture Patterns
+
+### Agent Structure
+Follow this pattern for all agents:
+```python
+# agent.py - Main agent definition
+from google.adk.agents import Agent
+from .prompts import return_instructions_[agent_name]
+
+def setup_before_agent_call(callback_context):
+    # Setup logic here
+    pass
+
+agent = Agent(
+    model=os.getenv("MODEL_NAME"),
+    name="agent_name",
+    instruction=return_instructions_[agent_name](),
+    tools=[...],
+    before_agent_callback=setup_before_agent_call,
+)
+```
+
+### Prompt Management
+Follow data_science agent pattern - use simple functions in prompts.py:
+```python
+def return_instructions_[agent_name]() -> str:
+    # Latest version - active
+    instruction_prompt_v1_1 = """..."""
+    
+    # Previous version - for comparison  
+    instruction_prompt_v1_0 = """..."""
+    
+    return instruction_prompt_v1_1  # Return active version
+```
+
+### Testing Pattern
+Every agent should have comprehensive tests:
+- Foundation tests for basic functionality
+- Integration tests with existing infrastructure
+- Prompt loading tests
+
+## Code Conventions
+
+### File Organization
+```
+instant_dashboard/
+├── __init__.py              # Module exports
+├── agent.py                 # Main coordinator agent
+├── prompts.py               # All prompt functions
+├── sub_agents/              # Individual specialized agents
+│   ├── query_planner.py     # Phase 2
+│   ├── bigquery_runner.py   # Phase 3
+│   ├── chart_generator.py   # Phase 4
+│   └── insight_generator.py # Phase 5
+└── test_foundation.py       # Tests
+```
+
+### Import Patterns
+```python
+# Standard imports first
+import os
+from datetime import date
+
+# Google ADK imports
+from google.adk.agents import Agent
+from google.adk.agents.callback_context import CallbackContext
+from google.genai import types
+
+# Local imports last
+from .prompts import return_instructions_coordinator
+from data_science.tools import call_db_agent  # Reuse existing tools
+```
+
+### Environment Variables
+Use these standard environment variables:
+- `ROOT_AGENT_MODEL` - Model for main agents
+- `BQ_PROJECT_ID` - BigQuery project
+- `BQ_DATASET_ID` - BigQuery dataset
+- `GOOGLE_CLOUD_LOCATION` - GCP location
+
+## Development Guidelines
+
+### Iterative Development
+- Build ONE agent at a time
+- Focus on learning and understanding each step
+- Test each phase thoroughly before moving to next
+- Always reuse existing data_science infrastructure when possible
+- Keep placeholder functions for future phases
+- Explain the "why" behind each design decision
+
+### Prompt Engineering
+- Store multiple versions in the same function with comments
+- Use descriptive variable names: `instruction_prompt_[agent]_v[x]_[x]`
+- Always include version history for comparison
+- Test prompt changes thoroughly
+
+### Tool Integration
+- Prefer importing existing tools from `data_science/` over creating new ones
+- When creating new tools, follow ADK patterns
+- Always include proper error handling and logging
+
+### Testing Requirements
+- Every new agent must have foundation tests
+- Test imports, environment setup, agent creation
+- Test integration with existing BigQuery infrastructure
+- Use descriptive test output with emojis for clarity
+
+## Specific Patterns to Follow
+
+### Agent Callbacks
+```python
+def setup_before_agent_call(callback_context: CallbackContext):
+    """Setup agent with required state."""
+    if "database_settings" not in callback_context.state:
+        callback_context.state["database_settings"] = get_database_settings()
+    
+    # Add schema to instruction if needed
+    schema = callback_context.state["database_settings"]["bq_ddl_schema"]
+    callback_context._invocation_context.agent.instruction = (
+        return_instructions_agent() + f"\n\nSchema:\n{schema}"
+    )
+```
+
+### Error Handling
+```python
+try:
+    # Agent operation
+    result = agent_operation()
+    print("✅ Success message")
+    return result
+except Exception as e:
+    print(f"❌ Error message: {e}")
+    return False
+```
+
+## Dependencies Management
+
+### pyproject.toml Updates
+When adding new dependencies:
+1. Add to appropriate section (main dependencies vs dev dependencies)
+2. Use version constraints: `^x.y.z`
+3. Group related dependencies with comments
+4. Update tests to verify new dependencies
+
+### Shared Infrastructure
+- Always use existing `pyproject.toml` and poetry setup
+- Share `.env` configuration with data_science agent
+- Reuse BigQuery client and authentication from data_science
+- Import and adapt existing tools rather than recreating
+
+## Future Phase Guidelines
+
+### Phase 2: QueryPlannerAgent
+- Focus: Convert natural language to SQL plans
+- Pattern: Adapt existing `data_science/sub_agents/bigquery/` functionality
+- Integration: Use existing schema cache and prompt templates
+
+### Phase 3: BigQueryRunnerAgent  
+- Focus: Execute SQL queries safely
+- Pattern: Wrap existing BigQuery execution tools
+- Integration: Error handling and result formatting
+
+### Phase 4: ChartGeneratorAgent
+- Focus: Transform data to Chart.js JSON specs
+- New dependency: May need chart libraries
+- Pattern: Pure data transformation, no external APIs
+
+### Phase 5: InsightGeneratorAgent
+- Focus: Generate business insights from data
+- Pattern: LLM-based analysis of results
+- Integration: Use existing LLM client patterns
+
+## Common Pitfalls to Avoid
+
+### DON'T:
+- Modify files in `data_science/` directory
+- Create complex prompt management systems
+- Duplicate existing BigQuery functionality
+- Skip testing phases
+- Create agents without proper prompt versioning
+- Use hardcoded values instead of environment variables
+
+### DO:
+- Follow the data_science agent patterns exactly
+- Test integration with existing infrastructure
+- Version prompts properly with comments
+- Use descriptive variable names and comments
+- Import and adapt existing tools
+- Build incrementally, one agent at a time
+- Keep placeholder functions for future development
+
+## Current Status Reminders
+- Phase 1 (Foundation): COMPLETED ✅
+- Phase 2 (QueryPlannerAgent): COMPLETED ✅
+- Phase 3 (BigQueryRunner): IN PROGRESS 🚧
+- All foundational infrastructure is in place
+- Prompt system follows data_science pattern
+- Integration with existing BigQuery tools works
+- Testing infrastructure organized in instant_dashboard/testing/
+- Ready to build BigQueryRunner with focus on learning and understanding 
