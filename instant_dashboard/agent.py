@@ -25,11 +25,11 @@ from google.genai import types
 from google.adk.agents import Agent
 from google.adk.agents.callback_context import CallbackContext
 
-# Import existing database functionality for testing integration
-from data_science.sub_agents.bigquery.tools import (
+# Import existing database functionality (now from our shared module)
+from .shared import (
     get_database_settings as get_bq_database_settings,
+    call_db_agent,
 )
-from data_science.tools import call_db_agent
 
 # Import prompt system
 from .prompts import return_instructions_coordinator
@@ -199,10 +199,10 @@ root_agent = Agent(
         You are InstantDashboard, a multi-agent data analytics assistant.
         Today's date: {date_today}
         
-        Phase 3: BigQueryRunner Integration Complete
-        ✅ Foundation complete - database integration working  
-        ✅ QueryPlannerAgent - structured query planning
-        🚀 NEW: BigQueryRunnerAgent - query plan execution
+        Phase 2 & 3: Complete Pipeline Integration
+        ✅ Phase 1: Foundation complete - database integration working  
+        ✅ Phase 2: QueryPlannerAgent - structured query planning
+        ✅ Phase 3: BigQueryRunnerAgent - query plan execution
         
         Available workflow options:
         1. Direct SQL: Use call_db_agent for immediate SQL generation & execution

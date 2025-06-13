@@ -26,12 +26,12 @@ from google.adk.agents.callback_context import CallbackContext
 from google.adk.tools import ToolContext
 from google.genai import types, Client
 
-# Import existing BigQuery functionality
-from data_science.sub_agents.bigquery.tools import (
+# Import existing BigQuery functionality (now from our shared module)
+from ..shared import (
     get_database_settings,
     run_bigquery_validation,
+    get_env_var,
 )
-from data_science.utils.utils import get_env_var
 
 # Import prompts (will add this function next)
 from ..prompts import return_instructions_bigquery_runner

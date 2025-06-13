@@ -17,7 +17,7 @@ def test_direct_query_planner():
     try:
         # Import the function
         from instant_dashboard.sub_agents.query_planner import generate_query_plan
-        from data_science.sub_agents.bigquery.tools import get_database_settings
+        from instant_dashboard.shared import get_database_settings
         
         # Create context
         class SimpleToolContext:

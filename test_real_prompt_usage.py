@@ -56,7 +56,7 @@ def test_direct_tool_calls():
     
     try:
         from instant_dashboard.agent import execute_full_pipeline
-        from data_science.sub_agents.bigquery.tools import get_database_settings
+        from instant_dashboard.shared import get_database_settings
         
         # Create simple tool context
         class SimpleToolContext:

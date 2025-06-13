@@ -17,7 +17,7 @@ def test_coordinator_integration():
     try:
         # Import coordinator and tools
         from instant_dashboard.agent import dashboard_agent, execute_full_pipeline
-        from data_science.sub_agents.bigquery.tools import get_database_settings
+        from instant_dashboard.shared import get_database_settings
         
         # Create a tool context
         class SimpleToolContext:

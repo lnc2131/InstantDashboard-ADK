@@ -18,7 +18,7 @@ def test_execute_query_plan():
     try:
         # Import our functions
         from instant_dashboard.sub_agents.bigquery_runner import execute_query_plan
-        from data_science.sub_agents.bigquery.tools import get_database_settings
+        from instant_dashboard.shared import get_database_settings
         
         # Create a tool context
         class SimpleToolContext:

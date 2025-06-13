@@ -21,7 +21,7 @@ def demo_query_planner():
     from instant_dashboard.agent import dashboard_agent
     from instant_dashboard.sub_agents.query_planner import generate_query_plan
     from google.adk.tools import ToolContext
-    from data_science.sub_agents.bigquery.tools import get_database_settings
+    from instant_dashboard.shared import get_database_settings
     
     # Test question
     question = "Show me the top 5 countries by total sessions for the last 30 days"

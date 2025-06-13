@@ -2,8 +2,7 @@
 
 ## Project Overview
 This is a multi-agent data analytics system built on Google's Agent Development Kit (ADK). The project contains:
-- `data_science/` - Original Google ADK sample agent (DO NOT MODIFY)
-- `instant_dashboard/` - Our custom InstantDashboard agent (ACTIVE DEVELOPMENT)
+- `instant_dashboard/` - Our custom InstantDashboard agent (ACTIVE DEVELOPMENT - SELF-CONTAINED)
 
 ## Current Development Status
 - **Phase 1**: Foundation Setup (COMPLETED ✅)
@@ -88,7 +87,7 @@ from google.genai import types
 
 # Local imports last
 from .prompts import return_instructions_coordinator
-from data_science.tools import call_db_agent  # Reuse existing tools
+from instant_dashboard.shared import call_db_agent  # Self-contained tools
 ```
 
 ### Environment Variables
@@ -165,7 +164,7 @@ When adding new dependencies:
 ### Shared Infrastructure
 - Always use existing `pyproject.toml` and poetry setup
 - Share `.env` configuration with data_science agent
-- Reuse BigQuery client and authentication from data_science
+- Use self-contained BigQuery client and authentication
 - Import and adapt existing tools rather than recreating
 
 ## Future Phase Guidelines

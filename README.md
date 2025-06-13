@@ -53,10 +53,11 @@ instant_dashboard/
 
 ### Shared Infrastructure
 ```
-shared/
-├── bigquery/                  # BigQuery tools and agents
-├── utils/                     # Utility functions  
-└── tools.py                   # Shared agent tools
+instant_dashboard/shared/
+├── bigquery.py               # BigQuery tools and client management
+├── utils.py                  # Utility functions  
+├── tools.py                  # Database agents and tools
+└── __init__.py               # Clean module exports
 ```
 
 ## Installation

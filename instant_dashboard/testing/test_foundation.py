@@ -30,7 +30,7 @@ def test_imports():
         return False
     
     try:
-        from data_science.sub_agents.bigquery.tools import get_database_settings
+        from instant_dashboard.shared import get_database_settings
         print("✅ Successfully imported existing BigQuery tools")
     except ImportError as e:
         print(f"❌ Failed to import BigQuery tools: {e}")
@@ -78,7 +78,7 @@ def test_database_settings():
     print("\n🧪 Testing database settings...")
     
     try:
-        from data_science.sub_agents.bigquery.tools import get_database_settings
+        from instant_dashboard.shared import get_database_settings
         settings = get_database_settings()
         
         print(f"✅ Database settings loaded:")

@@ -63,7 +63,7 @@ def test_validate_query_execution():
     
     try:
         from instant_dashboard.sub_agents.bigquery_runner import validate_query_execution
-        from data_science.sub_agents.bigquery.tools import get_database_settings
+        from instant_dashboard.shared import get_database_settings
         
         # Create test context
         class SimpleToolContext:
@@ -104,7 +104,7 @@ def test_execute_query_plan():
     
     try:
         from instant_dashboard.sub_agents.bigquery_runner import execute_query_plan
-        from data_science.sub_agents.bigquery.tools import get_database_settings
+        from instant_dashboard.shared import get_database_settings
         
         # Create test context
         class SimpleToolContext:
@@ -170,7 +170,7 @@ def test_phase_2_3_integration():
     try:
         from instant_dashboard.sub_agents.query_planner import generate_query_plan
         from instant_dashboard.sub_agents.bigquery_runner import execute_query_plan
-        from data_science.sub_agents.bigquery.tools import get_database_settings
+        from instant_dashboard.shared import get_database_settings
         
         # Create test context
         class SimpleToolContext:

@@ -17,7 +17,7 @@ def test_validate_query_execution():
     try:
         # Import our function
         from instant_dashboard.sub_agents.bigquery_runner import validate_query_execution
-        from data_science.sub_agents.bigquery.tools import get_database_settings
+        from instant_dashboard.shared import get_database_settings
         
         # Create a simple tool context
         class SimpleToolContext:

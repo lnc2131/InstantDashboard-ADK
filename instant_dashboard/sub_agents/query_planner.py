@@ -27,9 +27,8 @@ from google.adk.tools import ToolContext
 from google.genai import types, Client
 from google.cloud import bigquery
 
-# Import existing database functionality
-from data_science.sub_agents.bigquery.tools import get_database_settings
-from data_science.utils.utils import get_env_var
+# Import existing database functionality (now from our shared module)
+from ..shared import get_database_settings, get_env_var
 
 # Import prompts
 from ..prompts import return_instructions_query_planner
