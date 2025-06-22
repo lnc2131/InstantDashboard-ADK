@@ -39,7 +39,8 @@ from google.adk.tools import ToolContext
 
 from instant_dashboard.sub_agents.query_planner import query_planner_agent
 from instant_dashboard.sub_agents.bigquery_runner import bigquery_runner_agent
-from instant_dashboard.sub_agents.chart_generator import chart_generator_agent
+# Temporarily commented out for Railway deployment debugging
+# from instant_dashboard.sub_agents.chart_generator import chart_generator_agent
 
 date_today = date.today()
 

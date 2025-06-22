@@ -6,13 +6,13 @@ function getApiUrl(): string {
   if (typeof window !== 'undefined') {
     const hostname = window.location.hostname;
     
-    // If accessing through Railway production (contains railway in hostname)
-    if (hostname.includes('railway.app')) {
+    // If accessing through Vercel production (contains vercel.app in hostname)
+    if (hostname.includes('vercel.app')) {
       return 'https://instantdashboard-adk-production.up.railway.app';
     }
     
-    // If accessing through Vercel or other production domains
-    if (hostname.includes('vercel.app') || (!hostname.includes('localhost') && !hostname.includes('127.0.0.1') && !hostname.includes('ngrok'))) {
+    // If accessing through any production domain (not localhost, not ngrok)
+    if (!hostname.includes('localhost') && !hostname.includes('127.0.0.1') && !hostname.includes('ngrok')) {
       return 'https://instantdashboard-adk-production.up.railway.app';
     }
     
