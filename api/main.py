@@ -55,6 +55,10 @@ def setup_google_cloud_credentials():
             # Parse JSON to validate format
             credentials_data = json.loads(gcp_json)
             
+            # Fix private key formatting - replace escaped newlines with actual newlines
+            if "private_key" in credentials_data:
+                credentials_data["private_key"] = credentials_data["private_key"].replace("\\n", "\n")
+            
             # Write to file
             with open(credentials_path, "w") as f:
                 json.dump(credentials_data, f)
