@@ -5,6 +5,7 @@ This creates web APIs that expose our InstantDashboard agents to the frontend.
 
 import os
 import time
+import json
 from datetime import datetime
 from typing import Dict, Any, Optional
 
@@ -12,7 +13,6 @@ from fastapi import FastAPI, HTTPException, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
-import json
 
 # Import our InstantDashboard agents
 from instant_dashboard.agent import dashboard_agent, execute_full_pipeline
@@ -42,12 +42,70 @@ if ENABLE_AUTH:
 else:
     print("🔧 Demo mode: Authentication disabled")
 
+# Google Cloud credentials setup function
+def setup_google_cloud_credentials():
+    """Setup Google Cloud credentials file from environment variable."""
+    try:
+        # Check if JSON credentials are provided as environment variable
+        gcp_json = os.getenv("GOOGLE_APPLICATION_CREDENTIALS_JSON")
+        if gcp_json:
+            # Create the credentials file
+            credentials_path = "/tmp/gcp-key.json"
+            
+            # Parse JSON to validate format
+            credentials_data = json.loads(gcp_json)
+            
+            # Write to file
+            with open(credentials_path, "w") as f:
+                json.dump(credentials_data, f)
+            
+            # Set environment variable for Google Cloud libraries
+            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = credentials_path
+            
+            print(f"✅ Google Cloud credentials created at {credentials_path}")
+            print(f"   Project ID: {credentials_data.get('project_id', 'unknown')}")
+            print(f"   Client Email: {credentials_data.get('client_email', 'unknown')}")
+            
+            return True
+        else:
+            print("⚠️ No GOOGLE_APPLICATION_CREDENTIALS_JSON found")
+            # Check if GOOGLE_APPLICATION_CREDENTIALS points to existing file
+            existing_creds = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+            if existing_creds and os.path.exists(existing_creds):
+                print(f"✅ Using existing credentials file: {existing_creds}")
+                return True
+            else:
+                print("❌ No Google Cloud credentials configured")
+                return False
+            
+    except json.JSONDecodeError as e:
+        print(f"❌ Invalid JSON in GOOGLE_APPLICATION_CREDENTIALS_JSON: {e}")
+        return False
+    except Exception as e:
+        print(f"❌ Failed to setup Google Cloud credentials: {e}")
+        return False
+
 # Create FastAPI app
 app = FastAPI(
     title="InstantDashboard API",
     description="Multi-agent data analytics assistant with natural language interface",
     version="1.0.0"
 )
+
+# Startup event to initialize Google Cloud credentials
+@app.on_event("startup")
+async def startup_event():
+    """Initialize Google Cloud credentials and other startup tasks."""
+    print("🚀 Starting InstantDashboard API...")
+    
+    # Setup Google Cloud credentials first
+    if setup_google_cloud_credentials():
+        print("🔐 Google Cloud authentication configured")
+    else:
+        print("⚠️ Warning: Google Cloud authentication not configured")
+        print("   API will work but BigQuery functionality may be limited")
+    
+    print("✅ InstantDashboard API startup complete!")
 
 # Add CORS middleware for frontend
 app.add_middleware(
