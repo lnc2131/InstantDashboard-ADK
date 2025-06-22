@@ -19,10 +19,18 @@ from instant_dashboard.agent import dashboard_agent, execute_full_pipeline
 from instant_dashboard.shared import get_database_settings
 from google.adk.tools import ToolContext
 
-# Import real OAuth authentication
-from api.auth.oauth import get_current_user
-from api.auth.endpoints import router as auth_router
-from api.auth.models import User
+# Authentication imports - conditional for demo deployment
+ENABLE_AUTH = os.getenv("ENABLE_AUTH", "false").lower() == "true"
+
+if ENABLE_AUTH:
+    from api.auth.oauth import get_current_user
+    from api.auth.endpoints import router as auth_router
+    from api.auth.models import User
+else:
+    # Dummy auth for demo deployment
+    get_current_user = None
+    auth_router = None
+    User = None
 
 # Create FastAPI app
 app = FastAPI(
@@ -48,8 +56,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include authentication router
-app.include_router(auth_router)
+# Include authentication router (only if enabled)
+if ENABLE_AUTH and auth_router:
+    app.include_router(auth_router)
 
 # Security is now handled by auth module
 
@@ -110,8 +119,8 @@ async def health_check():
 @app.post("/api/query")
 async def query_data(
     request: QueryRequest
-    # Temporarily disable auth for hackathon demo
-    # current_user: User = Depends(get_current_user)
+    # Auth disabled via ENABLE_AUTH=false for demo deployment
+    # current_user: User = Depends(get_current_user) if ENABLE_AUTH else None
 ):
     """Main endpoint for natural language data queries."""
     start_time = time.time()
