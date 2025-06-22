@@ -19,7 +19,7 @@ interface Document {
   description: string;
   template_id: number;
   content: {
-    template_used: any;
+    template_used: { name: string };
     sections: DocumentSection[];
   };
   created_at: string;

@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { apiCall } from '../config/api';
 
 // Smart component that chooses the right chart based on data
-function DataVisualization({ data }: { data: any[] }) {
+function DataVisualization({ data }: { data: Record<string, unknown>[] }) {
   if (!data || data.length === 0) return null;
 
   // Get the keys from the first row to understand data structure
@@ -193,7 +193,15 @@ export default function Home() {
   // React State - this "remembers" what the user types and results
   const [question, setQuestion] = useState('');
   const [loading, setLoading] = useState(false);
-  const [results, setResults] = useState<any>(null);
+  const [results, setResults] = useState<{
+    success?: boolean;
+    data?: {
+      row_count?: number;
+      data?: Record<string, unknown>[];
+      generated_sql?: string;
+    };
+    execution_time?: number;
+  } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   // Function that runs when user clicks "Ask Question"

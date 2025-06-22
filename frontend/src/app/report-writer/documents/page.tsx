@@ -7,11 +7,7 @@ import {
   FileText, 
   Edit3, 
   Calendar, 
-  User,
-  MoreVertical,
-  Trash2,
-  Copy,
-  Download
+  MoreVertical
 } from 'lucide-react';
 import { apiCall } from '../../../config/api';
 
@@ -118,25 +114,7 @@ export default function DocumentsPage() {
     }
   };
 
-  const deleteDocument = async (id: number) => {
-    if (!confirm('Are you sure you want to delete this document?')) return;
-    
-    try {
-      const response = await apiCall(`/api/report-writer/documents/${id}`, {
-        method: 'DELETE'
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Failed to delete document: ${response.status}`);
-      }
-      
-      setDocuments(docs => docs.filter(doc => doc.id !== id));
-      
-    } catch (error) {
-      console.error('Error deleting document:', error);
-      alert('Failed to delete document. Please try again.');
-    }
-  };
+
 
   const getStatusColor = (status: string) => {
     switch (status) {
