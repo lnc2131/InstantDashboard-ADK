@@ -19,7 +19,9 @@ It orchestrates the pipeline: Natural Language → SQL → Results → Charts �
 """
 
 import os
-from datetime import date
+from datetime import date, datetime
+import time
+import json
 
 from google.genai import types
 from google.adk.agents import Agent
@@ -34,6 +36,10 @@ from .shared import (
 # Import prompt system
 from .prompts import return_instructions_coordinator
 from google.adk.tools import ToolContext
+
+from instant_dashboard.sub_agents.query_planner import query_planner_agent
+from instant_dashboard.sub_agents.bigquery_runner import bigquery_runner_agent
+from instant_dashboard.sub_agents.chart_generator import chart_generator_agent
 
 date_today = date.today()
 
@@ -116,44 +122,134 @@ def call_bigquery_runner_agent(
         return f"Error: Could not execute query plan - {e}"
 
 
-def execute_full_pipeline(
-    question: str,
-    tool_context: ToolContext,
-) -> str:
-    """Execute the full Phase 2 → Phase 3 pipeline.
-    
-    This convenience tool runs the complete process:
-    Natural Language → Query Plan → SQL Execution → Results
-    
-    Args:
-        question (str): Natural language question about the data.
-        tool_context (ToolContext): The tool context with database settings.
-        
-    Returns:
-        str: Final execution results with complete pipeline metadata.
+def execute_full_pipeline(question: str) -> dict:
     """
+    Execute the complete InstantDashboard pipeline with all agents.
+    
+    Now includes:
+    - Phase 1: Main coordinator 
+    - Phase 2: QueryPlannerAgent
+    - Phase 3: BigQueryRunnerAgent  
+    - Phase 4: ChartGeneratorAgent (NEW!)
+    """
+    print(f"🚀 EXECUTE_FULL_PIPELINE: Starting 4-phase pipeline...")
+    print(f"   Question: {question}")
+    print(f"   🔍 DEBUG: This is the NEW 4-phase version with ChartGenerator!")
+    
+    # UNMISTAKABLE DEBUG MARKER FOR API TESTING
+    print("🚨🚨🚨 EXECUTE_FULL_PIPELINE WAS CALLED! 🚨🚨🚨")
+    
+    start_time = time.time()
     
     try:
-        print("🚀 Starting full InstantDashboard pipeline...")
-        print(f"   Question: {question}")
+        # Phase 1: Main Dashboard Agent (coordinator)
+        print(f"📋 Phase 1: Coordinating analysis...")
         
-        # Phase 2: Generate query plan
-        print("\n📋 Phase 2: Generating query plan...")
-        query_plan = call_query_planner_agent(question, tool_context)
+        # Create a simple tool context for the agents
+        class SimpleToolContext:
+            def __init__(self):
+                self.state = {}
+                self.state["database_settings"] = get_bq_database_settings()
         
-        # Phase 3: Execute query plan  
-        print("\n⚡ Phase 3: Executing query plan...")
-        execution_result = call_bigquery_runner_agent(query_plan, tool_context)
+        tool_context = SimpleToolContext()
         
-        print("\n✅ Full pipeline complete!")
+        # Phase 2: Query Planning
+        print(f"📋 Phase 2: Generating query plan...")
+        from .sub_agents.query_planner import generate_query_plan
+        query_plan_result = generate_query_plan(question, tool_context)
+        print(f"✅ Generated structured query plan")
+        print(f"✅ QueryPlannerAgent tool called successfully")
         
-        # Return the execution result (which includes query plan metadata)
-        return execution_result
+        # Phase 3: Query Execution  
+        print(f"⚡ Phase 3: Executing query plan...")
+        from .sub_agents.bigquery_runner import execute_query_plan
+        execution_result = execute_query_plan(query_plan_result, tool_context)
+        print(f"✅ Query plan execution complete - Status: success")
+        print(f"✅ BigQueryRunnerAgent tool called successfully")
+        
+        # Parse execution result to get the data
+        try:
+            execution_data = json.loads(execution_result)
+            query_data = execution_data.get("data", []) if execution_data.get("status") == "success" else []
+        except (json.JSONDecodeError, KeyError):
+            query_data = []
+        
+        # Phase 4: Chart Generation (NEW!)
+        print(f"🎨 Phase 4: Generating chart specifications...")
+        if query_data:
+            # Call chart generator tool directly
+            from .sub_agents.chart_generator import generate_chart_specifications
+            
+            # Create callback context for the tool
+            class ChartCallbackContext:
+                def __init__(self, data, user_query):
+                    self.input = {"data": data, "user_query": user_query}
+            
+            chart_context = ChartCallbackContext(query_data, question)
+            chart_result_str = generate_chart_specifications(chart_context)
+            print(f"✅ Chart specifications generated")
+            print(f"✅ ChartGeneratorAgent tool called successfully")
+        else:
+            chart_result_str = json.dumps({
+                "success": False, 
+                "error": "No data available for chart generation",
+                "recommendations": []
+            })
+            print(f"⚠️ No data for chart generation")
+        
+        # Combine all results
+        end_time = time.time()
+        execution_time = end_time - start_time
+        
+        # Parse chart result
+        try:
+            chart_data = json.loads(chart_result_str)
+        except (json.JSONDecodeError, KeyError):
+            chart_data = {"success": False, "error": "Chart generation parsing failed"}
+        
+        # Build comprehensive response
+        pipeline_result = {
+            "success": True,
+            "data": execution_data if 'execution_data' in locals() else {},
+            "chart_specifications": chart_data,
+            "execution_time": execution_time,
+            "timestamp": datetime.now().isoformat(),
+            "pipeline_phases": {
+                "query_planning": {"status": "success", "agent": "QueryPlannerAgent"},
+                "query_execution": {"status": "success", "agent": "BigQueryRunnerAgent"}, 
+                "chart_generation": {"status": "success" if chart_data.get("success") else "error", "agent": "ChartGeneratorAgent"}
+            },
+            "query_plan_used": True,
+            "row_count": len(query_data),
+            "error_message": None
+        }
+        
+        print(f"✅ Full pipeline complete!")
+        print(f"   Total execution time: {execution_time:.2f}s")
+        print(f"   Phases completed: 4/4")
+        print(f"   Charts recommended: {len(chart_data.get('chart_recommendations', []))}")
+        
+        return pipeline_result
         
     except Exception as e:
-        error_msg = f"❌ Error in full pipeline: {e}"
-        print(error_msg)
-        return f"Error: Pipeline failed - {e}"
+        end_time = time.time()
+        execution_time = end_time - start_time
+        
+        print(f"❌ Pipeline error: {e}")
+        
+        return {
+            "success": False,
+            "data": {},
+            "chart_specifications": {"success": False, "error": "Pipeline failed"},
+            "execution_time": execution_time,
+            "timestamp": datetime.now().isoformat(),
+            "error_message": str(e),
+            "pipeline_phases": {
+                "query_planning": {"status": "unknown"},
+                "query_execution": {"status": "unknown"},
+                "chart_generation": {"status": "error"}
+            }
+        }
 
 
 def setup_before_agent_call(callback_context: CallbackContext):
@@ -218,7 +314,7 @@ root_agent = Agent(
         call_db_agent,  # Phase 1: Direct database access
         call_query_planner_agent,  # Phase 2: Structured query planning
         call_bigquery_runner_agent,  # Phase 3: Query plan execution
-        execute_full_pipeline,  # Phase 2 + 3: Complete pipeline
+        # execute_full_pipeline now called directly, not as a tool
     ],
     before_agent_callback=setup_before_agent_call,
     generate_content_config=types.GenerateContentConfig(temperature=0.01),

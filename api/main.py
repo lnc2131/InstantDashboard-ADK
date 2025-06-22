@@ -19,6 +19,11 @@ from instant_dashboard.agent import dashboard_agent, execute_full_pipeline
 from instant_dashboard.shared import get_database_settings
 from google.adk.tools import ToolContext
 
+# Import real OAuth authentication
+from api.auth.oauth import get_current_user
+from api.auth.endpoints import router as auth_router
+from api.auth.models import User
+
 # Create FastAPI app
 app = FastAPI(
     title="InstantDashboard API",
@@ -29,14 +34,24 @@ app = FastAPI(
 # Add CORS middleware for frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],  # Next.js dev server
+    allow_origins=[
+        "http://localhost:3000", 
+        "http://127.0.0.1:3000", 
+        "http://192.168.2.5:3000",
+        "https://2f6d-61-228-212-206.ngrok-free.app",  # Add ngrok URL for hackathon judges
+        "https://*.railway.app",  # Railway frontend domain
+        "https://*.vercel.app",   # In case we use Vercel for frontend
+        "*"  # Allow all origins for hackathon demo (remove in production)
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Security
-security = HTTPBearer(auto_error=False)
+# Include authentication router
+app.include_router(auth_router)
+
+# Security is now handled by auth module
 
 # Pydantic models for API requests/responses
 class QueryRequest(BaseModel):
@@ -52,6 +67,8 @@ class QueryResponse(BaseModel):
     query_plan_used: bool = False
     row_count: int = 0
     error_message: Optional[str] = None
+    chart_specifications: Optional[Any] = None  # NEW: Chart specifications from ChartGeneratorAgent
+    pipeline_phases: Optional[Dict[str, Any]] = None  # NEW: Pipeline execution details
 
 class HealthResponse(BaseModel):
     status: str
@@ -68,15 +85,7 @@ class SimpleToolContext:
         self.state["database_settings"] = get_database_settings()
         self.state["all_db_settings"] = {"use_database": "BigQuery"}
 
-# Utility functions
-def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)) -> Dict[str, Any]:
-    """Get current user from JWT token (placeholder for now)."""
-    # For now, return a demo user. We'll implement proper OAuth later.
-    return {
-        "user_id": "demo_user",
-        "email": "demo@example.com",
-        "is_authenticated": credentials is not None
-    }
+# Utility functions are now imported from auth module
 
 @app.get("/", response_model=HealthResponse)
 async def health_check():
@@ -98,62 +107,56 @@ async def health_check():
             detail=f"Service unhealthy: {str(e)}"
         )
 
-@app.post("/api/query", response_model=QueryResponse)
+@app.post("/api/query")
 async def query_data(
-    request: QueryRequest,
-    current_user: Dict[str, Any] = Depends(get_current_user)
+    request: QueryRequest
+    # Temporarily disable auth for hackathon demo
+    # current_user: User = Depends(get_current_user)
 ):
     """Main endpoint for natural language data queries."""
     start_time = time.time()
     
     try:
-        # Create tool context
-        tool_context = SimpleToolContext(user_id=current_user["user_id"])
-        
-        # Execute the query using our InstantDashboard agents
         if request.use_full_pipeline:
-            # Use the full Phase 2 + 3 pipeline
-            result = execute_full_pipeline(request.question, tool_context)
+            # Call the 4-phase pipeline directly and return raw result
+            result = execute_full_pipeline(request.question)
+            
+            # Add execution metadata
+            result["execution_time"] = time.time() - start_time
+            result["timestamp"] = datetime.now().isoformat()
+            
+            return result
         else:
-            # Use direct database agent (Phase 1)
+            # Legacy path
             from instant_dashboard.shared import call_db_agent
+            tool_context = SimpleToolContext(user_id="demo_user")
             result = await call_db_agent(request.question, tool_context)
-        
-        # Parse the result
-        try:
-            result_data = json.loads(result) if isinstance(result, str) else result
-        except json.JSONDecodeError:
-            # If not JSON, treat as plain text response
-            result_data = {"response": result}
-        
-        execution_time = time.time() - start_time
-        
-        # Extract metadata if available
-        query_plan_used = result_data.get("query_plan_used", False) if isinstance(result_data, dict) else False
-        row_count = result_data.get("row_count", 0) if isinstance(result_data, dict) else 0
-        
-        return QueryResponse(
-            success=True,
-            data=result_data,
-            execution_time=execution_time,
-            timestamp=datetime.now().isoformat(),
-            query_plan_used=query_plan_used,
-            row_count=row_count
-        )
+            
+            try:
+                parsed_result = json.loads(result) if isinstance(result, str) else result
+            except json.JSONDecodeError:
+                parsed_result = {"response": result}
+            
+            return {
+                "success": True,
+                "data": parsed_result,
+                "execution_time": time.time() - start_time,
+                "timestamp": datetime.now().isoformat(),
+                "query_plan_used": False,
+                "row_count": 0
+            }
         
     except Exception as e:
-        execution_time = time.time() - start_time
-        
-        return QueryResponse(
-            success=False,
-            data=None,
-            execution_time=execution_time,
-            timestamp=datetime.now().isoformat(),
-            error_message=str(e)
-        )
+        return {
+            "success": False,
+            "data": None,
+            "execution_time": time.time() - start_time,
+            "timestamp": datetime.now().isoformat(),
+            "error_message": str(e)
+        }
 
 @app.get("/api/schema")
-async def get_database_schema(current_user: Dict[str, Any] = Depends(get_current_user)):
+async def get_database_schema():
     """Get the database schema information."""
     try:
         settings = get_database_settings()
@@ -188,6 +191,29 @@ async def get_available_agents():
         }
     }
 
+@app.get("/api/test-charts")
+async def test_chart_generation():
+    """Test endpoint to verify chart generation is working."""
+    try:
+        # Call execute_full_pipeline directly
+        result = execute_full_pipeline("Show me top companies")
+        
+        return {
+            "test_successful": True,
+            "has_chart_specifications": "chart_specifications" in result,
+            "response_keys": list(result.keys()),
+            "chart_count": len(result.get("chart_specifications", {}).get("chart_recommendations", [])),
+            "sample_response": {k: str(v)[:100] + "..." if len(str(v)) > 100 else v 
+                             for k, v in result.items() if k != "data"}
+        }
+    except Exception as e:
+        return {
+            "test_successful": False,
+            "error": str(e)
+        }
+
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8001) 
+    import os
+    port = int(os.getenv("PORT", 8001))
+    uvicorn.run(app, host="0.0.0.0", port=port) 

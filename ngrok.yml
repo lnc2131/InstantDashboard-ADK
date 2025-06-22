@@ -1,0 +1,9 @@
+version: "2"
+authtoken: # Will use the default authtoken
+tunnels:
+  api:
+    proto: http
+    addr: 8001
+  frontend:
+    proto: http
+    addr: 3000 
