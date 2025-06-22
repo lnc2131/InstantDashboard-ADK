@@ -19,18 +19,28 @@ from instant_dashboard.agent import dashboard_agent, execute_full_pipeline
 from instant_dashboard.shared import get_database_settings
 from google.adk.tools import ToolContext
 
-# Authentication imports - conditional for demo deployment
+# Authentication imports - conditional for demo deployment with error handling
 ENABLE_AUTH = os.getenv("ENABLE_AUTH", "false").lower() == "true"
 
+get_current_user = None
+auth_router = None
+User = None
+
 if ENABLE_AUTH:
-    from api.auth.oauth import get_current_user
-    from api.auth.endpoints import router as auth_router
-    from api.auth.models import User
+    try:
+        from api.auth.oauth import get_current_user
+        from api.auth.endpoints import router as auth_router
+        from api.auth.models import User
+        print("✅ Authentication enabled successfully")
+    except Exception as e:
+        print(f"⚠️ Warning: Could not load authentication modules: {e}")
+        print("   Continuing in demo mode without authentication...")
+        ENABLE_AUTH = False
+        get_current_user = None
+        auth_router = None
+        User = None
 else:
-    # Dummy auth for demo deployment
-    get_current_user = None
-    auth_router = None
-    User = None
+    print("🔧 Demo mode: Authentication disabled")
 
 # Create FastAPI app
 app = FastAPI(
@@ -56,9 +66,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include authentication router (only if enabled)
-if ENABLE_AUTH and auth_router:
-    app.include_router(auth_router)
+# Include authentication router (only if enabled and available)
+if ENABLE_AUTH and auth_router is not None:
+    try:
+        app.include_router(auth_router)
+        print("✅ Authentication router added successfully")
+    except Exception as e:
+        print(f"⚠️ Warning: Could not add authentication router: {e}")
 
 # Security is now handled by auth module
 
