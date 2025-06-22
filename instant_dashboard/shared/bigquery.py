@@ -37,11 +37,7 @@ MAX_NUM_ROWS = 80
 # Global variables for caching
 database_settings = None
 bq_client = None
-
-# Initialize LLM client
-project = os.getenv("BQ_PROJECT_ID", None)
-location = os.getenv("GOOGLE_CLOUD_LOCATION", "us-central1")
-llm_client = Client(vertexai=True, project=project, location=location)
+llm_client = None  # Initialize lazily
 
 # ChaseSQL constants (migrated from data_science)
 chase_sql_constants_dict: immutabledict.immutabledict[str, Any] = (
@@ -72,6 +68,28 @@ def get_bq_client():
     if bq_client is None:
         bq_client = bigquery.Client(project=get_env_var("BQ_PROJECT_ID"))
     return bq_client
+
+
+def get_llm_client():
+    """Get LLM client with lazy initialization and error handling."""
+    global llm_client
+    if llm_client is None:
+        try:
+            project = os.getenv("BQ_PROJECT_ID", None)
+            location = os.getenv("GOOGLE_CLOUD_LOCATION", "us-central1")
+            
+            if not project:
+                raise ValueError("BQ_PROJECT_ID environment variable not set")
+                
+            llm_client = Client(vertexai=True, project=project, location=location)
+            
+        except Exception as e:
+            print(f"⚠️ Warning: Could not initialize LLM client: {e}")
+            print("   This is expected for demo deployments without full Google Cloud setup.")
+            # Create a dummy client that will raise clear errors when used
+            llm_client = None
+            
+    return llm_client
 
 
 def get_database_settings():
@@ -215,7 +233,11 @@ The database structure is defined by the following table schemas (possibly with 
         MAX_NUM_ROWS=MAX_NUM_ROWS, SCHEMA=ddl_schema, QUESTION=question
     )
 
-    response = llm_client.models.generate_content(
+    client = get_llm_client()
+    if client is None:
+        raise RuntimeError("LLM client not available - Google Cloud credentials not configured")
+    
+    response = client.models.generate_content(
         model=os.getenv("BASELINE_NL2SQL_MODEL"),
         contents=prompt,
         config={"temperature": 0.1},
