@@ -96,4 +96,7 @@ temp/
 *.csv
 *.json
 data/
-datasets/ 
+datasets/
+
+# Archive directory for temporary/personal files
+archive/ 
