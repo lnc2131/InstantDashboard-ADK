@@ -1,6 +1,10 @@
 # InstantDashboard
 
-A multi-agent data analytics back end API that provides natural language interfaces to data insights. It is within the larger project called neuralWrite, which you can demo here: https://v0-reportwriter.vercel.app/. Or you can try out just the mock front-end for InstantDashboard here: https://instant-dashboard-adk-l9bz.vercel.app/
+A multi-agent data analytics back end API that provides natural language interfaces to data insights. 
+
+It is within the larger project called neuralWrite, which you can demo here: https://v0-reportwriter.vercel.app/. 
+
+Or you can try out just the mock front-end for InstantDashboard here: https://instant-dashboard-adk-l9bz.vercel.app/
 
 ## Overview
 
