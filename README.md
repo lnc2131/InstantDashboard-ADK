@@ -1,6 +1,6 @@
 # InstantDashboard
 
-A multi-agent data analytics assistant that provides natural language interfaces to data insights.
+A multi-agent data analytics back end API that provides natural language interfaces to data insights. It is within the larger project called neuralWrite, which you can demo here: https://v0-reportwriter.vercel.app/. Or you can try out just the mock front-end for InstantDashboard here: https://instant-dashboard-adk-l9bz.vercel.app/
 
 ## Overview
 
@@ -14,9 +14,9 @@ Structured JSON Query Plan
 Generated SQL Query
     ↓ BigQuery Execution
 Formatted JSON Results
-    ↓ Phase 4: ChartGenerator (Future)
+    ↓ Phase 4: ChartGenerator 
 Chart.js Visualizations
-    ↓ Phase 5: InsightGenerator (Future)
+    ↓ Phase 5: InsightGenerator
 Business Insights
 ```
 
@@ -28,20 +28,14 @@ Business Insights
 - **Real Business Data**: Works with actual BigQuery datasets
 - **Multi-Agent Architecture**: Specialized agents for different pipeline stages
 
-## Phase Status
-
-- ✅ **Phase 1**: Foundation (Database integration, environment setup)
-- ✅ **Phase 2**: QueryPlannerAgent (Natural language → structured query plans)  
-- ✅ **Phase 3**: BigQueryRunner (Query plans → SQL → data execution)
-- 🔲 **Phase 4**: ChartGenerator (Data → Chart.js visualizations)
-- 🔲 **Phase 5**: InsightGenerator (Data → business insights)
-
 ## Architecture
+<img width="698" alt="Instant-Dashboard Architecture" src="https://github.com/user-attachments/assets/72b01fa0-763a-41ff-a9e6-047a25b2c21c" />
 
 ### Agent Structure
 ```
 instant_dashboard/
 ├── agent.py                   # Main coordinator agent
+
 ├── prompts.py                 # Versioned prompt system
 ├── sub_agents/                # Specialized agents
 │   ├── query_planner.py       # Phase 2: Query planning
@@ -51,14 +45,6 @@ instant_dashboard/
 └── testing/                   # Comprehensive test suite
 ```
 
-### Shared Infrastructure
-```
-instant_dashboard/shared/
-├── bigquery.py               # BigQuery tools and client management
-├── utils.py                  # Utility functions  
-├── tools.py                  # Database agents and tools
-└── __init__.py               # Clean module exports
-```
 
 ## Installation
 
@@ -135,17 +121,6 @@ open http://127.0.0.1:8000/docs
 - "Which stores have the highest customer satisfaction?"
 - "Compare revenue between different product categories"
 
-## Development
-
-### Project Structure
-
-The project follows a **learning-focused, incremental development** approach:
-
-- **Phase-by-Phase Development**: Each phase builds on the previous
-- **Comprehensive Testing**: All components have test coverage
-- **Documentation First**: Clear documentation for each feature
-- **Reusable Components**: Shared infrastructure across phases
-
 ### Running Tests
 
 ```bash
@@ -159,69 +134,6 @@ python instant_dashboard/testing/test_phase_3.py
 python test_real_adk_integration.py
 ```
 
-### Adding New Features
-
-1. **Design**: Plan the new agent/tool functionality
-2. **Implement**: Create the agent in `sub_agents/`
-3. **Test**: Add comprehensive tests in `testing/`
-4. **Integrate**: Add to main coordinator in `agent.py`
-5. **Document**: Update README and create phase documentation
-
-## API Reference
-
-### Main Coordinator Tools
-
-- `call_db_agent`: Direct SQL generation and execution
-- `call_query_planner_agent`: Structured query planning  
-- `call_bigquery_runner_agent`: Query plan execution
-- `execute_full_pipeline`: Complete Phase 2 + 3 workflow
-
-### Agent Architecture Patterns
-
-Each agent follows consistent patterns:
-- **Prompt versioning**: `prompts.py` with version history
-- **Tool composition**: Reusable functions
-- **Error handling**: Comprehensive error management
-- **State management**: Context preservation across calls
-
-## Contributing
-
-### Development Principles
-
-1. **Learning First**: Prioritize understanding over speed
-2. **Incremental**: Build one small piece at a time  
-3. **Test Everything**: Comprehensive test coverage required
-4. **Document Everything**: Clear explanations for all features
-5. **Safety First**: Validation and sandboxing for all operations
-
-### Code Conventions
-
-- **Imports**: Local imports in functions to avoid circular dependencies
-- **Error Handling**: Use consistent error messages with clear context
-- **Prompt Management**: Version all prompts with clear change history
-- **Testing**: Each phase has its own comprehensive test suite
-
-## Deployment
-
-### Production Checklist
-
-- [ ] Environment variables configured
-- [ ] Google Cloud authentication set up
-- [ ] BigQuery permissions verified
-- [ ] All tests passing
-- [ ] Performance benchmarks met
-
-### Monitoring
-
-The system includes comprehensive logging and error tracking:
-- Agent execution logs
-- BigQuery query performance
-- Error rates and types
-- User interaction patterns
-
-## License
-
-Apache License 2.0. See LICENSE file for details.
 
 ## Support
 
