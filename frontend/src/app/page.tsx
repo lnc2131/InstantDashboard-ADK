@@ -284,44 +284,7 @@ export default function Home() {
             alignItems: 'center',
             gap: '12px'
           }}>
-            <button
-              onClick={() => router.push('/report-writer')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '8px 16px',
-                backgroundColor: '#3b82f6',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                fontSize: '14px',
-                fontWeight: '600',
-                cursor: 'pointer'
-              }}
-            >
-              <FileText size={16} />
-              New Report
-            </button>
-            
-            <button
-              onClick={() => router.push('/report-writer/documents')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '8px 16px',
-                backgroundColor: 'white',
-                color: '#374151',
-                border: '1px solid #d1d5db',
-                borderRadius: '6px',
-                fontSize: '14px',
-                fontWeight: '500',
-                cursor: 'pointer'
-              }}
-            >
-              📁 My Reports
-            </button>
+            {/* Navigation removed - focusing on InstantDashboard */}
           </div>
         </div>
       </header>
@@ -392,86 +355,7 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Report Writer Card */}
-          <div style={{
-            backgroundColor: 'white',
-            borderRadius: '12px',
-            padding: '24px',
-            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
-            border: '1px solid #e5e7eb',
-            position: 'relative'
-          }}>
-            <div style={{
-              position: 'absolute',
-              top: '12px',
-              right: '12px',
-              backgroundColor: '#10b981',
-              color: 'white',
-              fontSize: '10px',
-              fontWeight: '600',
-              padding: '4px 8px',
-              borderRadius: '12px'
-            }}>
-              NEW
-            </div>
-            
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
-              marginBottom: '12px'
-            }}>
-              <div style={{
-                width: '40px',
-                height: '40px',
-                backgroundColor: '#ecfdf5',
-                borderRadius: '8px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}>
-                <FileText size={20} color="#10b981" />
-              </div>
-              <h3 style={{
-                fontSize: '18px',
-                fontWeight: '600',
-                color: '#111827',
-                margin: 0
-              }}>
-                Report Writer
-              </h3>
-            </div>
-            <p style={{
-              fontSize: '14px',
-              color: '#6b7280',
-              marginBottom: '16px',
-              lineHeight: '1.5'
-            }}>
-              Create professional business reports with AI-powered content generation. Choose from templates for financial, marketing, sales, and operational reports.
-            </p>
-            <Link href="/report-writer" style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '8px 16px',
-              backgroundColor: '#10b981',
-              color: 'white',
-              textDecoration: 'none',
-              borderRadius: '6px',
-              fontSize: '14px',
-              fontWeight: '500',
-              transition: 'background-color 0.2s'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#059669';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '#10b981';
-            }}>
-              Try Report Writer
-              <ArrowRight size={14} />
-            </Link>
-          </div>
+          {/* Report Writer Card - REMOVED */}
         </div>
       </div>
 

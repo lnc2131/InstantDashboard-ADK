@@ -50,30 +50,8 @@ pyjwt = { extras = ["crypto"], version = "^2.8.0" }
 redis = "^5.2.1"
 passlib = { extras = ["bcrypt"], version = "^1.7.4" }
 
-# NEW: Interactive Analytics Report Writer dependencies
-# PostgreSQL and database management
-psycopg2-binary = "^2.9.9"
-sqlalchemy = "^2.0.36"
-alembic = "^1.14.0"
-
-# WebSocket support for real-time collaboration
-websockets = "^13.1"
-python-socketio = "^5.11.4"
-
-# Document management and export
-python-docx = "^1.1.2"
-weasyprint = "^63.0"
-pypdf = "^5.1.0"
-
-# Enhanced authentication and security
-google-auth = "^2.35.0"
-google-auth-oauthlib = "^1.2.1"
-google-auth-httplib2 = "^0.2.0"
-
-# Additional utilities for report writer
-jinja2 = "^3.1.4"
-markdown = "^3.7"
-bleach = "^6.2.0"
+# Removed: Report Writer dependencies (no longer needed)
+# InstantDashboard uses BigQuery and doesn't need PostgreSQL/document generation
 
 
 [tool.poetry.group.dev.dependencies]

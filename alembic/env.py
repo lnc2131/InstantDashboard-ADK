@@ -1,4 +1,4 @@
-"""Alembic environment configuration for Interactive Analytics Report Writer"""
+"""Alembic environment configuration - InstantDashboard only"""
 
 from logging.config import fileConfig
 import os
@@ -10,9 +10,11 @@ from alembic import context
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
-# Import our models and database config
-from report_writer.database.models import Base
-from report_writer.database.config import db_config
+# Note: Report Writer functionality removed
+# No database models currently configured for migrations
+# Future: Add InstantDashboard models here if needed
+Base = None
+db_config = None
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -25,7 +27,7 @@ if config.config_file_name is not None:
 
 # add your model's MetaData object here
 # for 'autogenerate' support
-target_metadata = Base.metadata
+target_metadata = None  # No models configured
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
@@ -35,7 +37,8 @@ target_metadata = Base.metadata
 
 def get_database_url():
     """Get database URL from our config"""
-    return db_config.database_url
+    # No database configured for migrations
+    return "sqlite:///./temp.db"  # Placeholder
 
 
 def run_migrations_offline() -> None:
@@ -69,8 +72,10 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
-    # Use our existing database configuration
-    connectable = db_config.engine
+    # No database engine configured
+    # Use a basic SQLite engine as placeholder
+    from sqlalchemy import create_engine
+    connectable = create_engine("sqlite:///./temp.db")
 
     with connectable.connect() as connection:
         context.configure(

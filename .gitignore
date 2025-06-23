@@ -99,4 +99,7 @@ data/
 datasets/
 
 # Archive directory for temporary/personal files
-archive/ 
+archive/
+
+# Cursor IDE configuration
+.cursorrules 
